@@ -69,7 +69,8 @@ class FileSystem {
         }
 
         this.currentDir = target;
-        prompt.innerText = "guest@lucaargolo.dev:" + this.pwd() + "$ ";
+        //Theres an invisible character down here, so some browsers stop making this a email link.
+        prompt.innerText = "guest@​lucaargolo.dev:" + this.pwd() + "$ ";
         return '';
     }
 
