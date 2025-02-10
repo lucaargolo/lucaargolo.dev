@@ -1,5 +1,5 @@
 const terminal = document.getElementById('terminal');
-const input = document.getElementById('input');
+
 const commandHistory = [];
 let historyIndex = -1;
 let lastTabPress = 0;
@@ -8,11 +8,15 @@ let suggestionIndex = 0;
 let scrollTimeout;
 let isUserScroll = true;
 
+document.addEventListener('click', function() {
+    focus()
+})
+
 terminal.addEventListener('mousemove', function(e) {
     const rect = terminal.getBoundingClientRect();
     const distanceFromRight = rect.right - e.clientX;
     
-    if (distanceFromRight <= 10) {
+    if (distanceFromRight <= 25) {
         terminal.classList.add('show-scrollbar');
     } else {
         terminal.classList.remove('show-scrollbar');
@@ -43,65 +47,44 @@ terminal.addEventListener('scroll', function() {
     }
 });
 
-function getSuggestions(input) {
-    const parts = input.trim().split(' ');
-    const current = parts[parts.length - 1];
-
-    if (parts.length === 1) {
-        return Object.keys(commands)
-            .filter(cmd => cmd.startsWith(current))
-            .sort();
-    }
-
-    const currentDir = fs.resolvePath('.');
-    if (!currentDir || !currentDir.children) return [];
-
-    return Object.keys(currentDir.children)
-        .filter(name => name.startsWith(current))
-        .sort();
-}
-
-function applyCompletion(completion) {
-    const parts = input.value.trim().split(' ');
-    parts[parts.length - 1] = completion;
-    input.value = parts.join(' ');
-}
-
-input.addEventListener('keydown', function(e) {
+document.getElementById("input").addEventListener('keydown', function(e) {
+    const input = document.getElementById("input")
     if (e.key === 'Tab') {
         e.preventDefault();
         
         const now = Date.now();
         if (now - lastTabPress > 500) {
-            suggestions = getSuggestions(input.value);
+            suggestions = suggest(input.value);
             suggestionIndex = 0;
         }
 
         if (suggestions.length > 0) {
-            applyCompletion(suggestions[suggestionIndex]);
+            complete(suggestions[suggestionIndex]);
             suggestionIndex = (suggestionIndex + 1) % suggestions.length;
         }
 
         lastTabPress = now;
     } else if (e.key === 'Enter') {
         suggestions = [];
+
         const inputValue = input.value.trim();
+        input.value = '';
         if (inputValue) {
             commandHistory.push(inputValue);
             historyIndex = commandHistory.length;
         }
-        const promptText = document.querySelector('.prompt').textContent;
+
+        const prompt = document.getElementById('prompt')
+        const promptText = prompt ? prompt.textContent : "";
         
         const commandOutput = document.createElement('p');
         commandOutput.className = 'output';
         commandOutput.innerHTML = `${promptText}${inputValue}`;
+
         terminal.insertBefore(commandOutput, terminal.lastElementChild);
+        bottom()
 
-        processCommand(inputValue);
-
-        input.value = '';
-        isUserScroll = false;
-        terminal.scrollTop = terminal.scrollHeight;
+        execute(inputValue);
     } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (historyIndex > 0) {
@@ -120,7 +103,10 @@ input.addEventListener('keydown', function(e) {
     }
 });
 
-function processCommand(input) {
+async function execute(input) {
+    let commandInterface = terminal.lastElementChild
+    terminal.removeChild(commandInterface)
+
     const parts = input.trim().split(' ');
     const name = parts[0].toLowerCase();
 
@@ -137,18 +123,58 @@ function processCommand(input) {
         } else {
             let result = args.slice(0, j - 1);
             result.push(args.slice(j - 1).join(" "));
-            output = command.execute(result);
+            output = await command.execute(result);
         }
     } else {
         output = `Command not found: ${name}. Type 'help' for available commands.`;
     }
 
+    print(output)
+    terminal.appendChild(commandInterface)
+    bottom()
+    focus()
+}
+
+function print(output) {
     const commandOutput = document.createElement('p');
     commandOutput.className = 'output';
     commandOutput.innerHTML = output;
-    terminal.insertBefore(commandOutput, terminal.lastElementChild);
+    terminal.appendChild(commandOutput);
+    bottom()
 }
 
-// Keep input focused
-document.addEventListener('click', () => input.focus());
-processCommand('about')
+function suggest(input) {
+    const parts = input.trim().split(' ');
+    const current = parts[parts.length - 1];
+
+    if (parts.length === 1) {
+        return Object.keys(commands)
+            .filter(cmd => cmd.startsWith(current))
+            .sort();
+    }
+
+    const currentDir = fs.resolve('.');
+    if (!currentDir || !currentDir.children) return [];
+
+    return Object.keys(currentDir.children)
+        .filter(name => name.startsWith(current))
+        .sort();
+}
+
+function complete(completion) {
+    const input = document.getElementById("input")
+    const parts = input.value.trim().split(' ');
+    parts[parts.length - 1] = completion;
+    input.value = parts.join(' ');
+}
+
+function bottom() {
+    isUserScroll = false;
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+function focus() {
+    document.getElementById("input").focus()
+}
+ 
+execute('about')

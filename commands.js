@@ -130,5 +130,22 @@ const commands = {
             color = args[0];
             return 'Color set!';
         }
+    },
+    test: {
+        name: 'test',
+        group: 'fun',
+        description: 'Test command',
+        args: [],
+        execute: () => new Promise(resolve => {
+            for(let i = 10; i >= 0; i--) {
+                setTimeout(() => {
+                    if(i === 0) {
+                        resolve('')
+                    }else{
+                        print(i + "...")
+                    }
+                }, 1000 * (10 - i));
+            }
+        })
     }
 };

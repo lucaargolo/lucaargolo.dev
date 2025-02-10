@@ -1,4 +1,3 @@
-const prompt = document.getElementById('prompt');
 const home = '/home/guest'
 
 class FileSystem {
@@ -13,7 +12,7 @@ class FileSystem {
     }
 
     // Helper method to resolve path
-    resolvePath(path) {
+    resolve(path) {
         if (!path) return this.currentDir;
 
         const isAbsolute = path.startsWith('/');
@@ -60,7 +59,7 @@ class FileSystem {
             path = home
         }
 
-        const target = this.resolvePath(path);
+        const target = this.resolve(path);
         if (!target) {
             return `cd: no such directory: ${path}`;
         }
@@ -70,13 +69,15 @@ class FileSystem {
 
         this.currentDir = target;
         //Theres an invisible character down here, so some browsers stop making this a email link.
-        prompt.innerText = "guest@​lucaargolo.dev:" + this.pwd() + "$ ";
+        const prompt = document.getElementById('prompt')
+        if(prompt)
+            prompt.innerText = "guest@​lucaargolo.dev:" + this.pwd() + "$ ";
         return '';
     }
 
     // List directory contents
     ls(path) {
-        const target = this.resolvePath(path || '.');
+        const target = this.resolve(path || '.');
         if (!target) {
             return `ls: no such file or directory: ${path}`;
         }
@@ -99,7 +100,7 @@ class FileSystem {
         const parts = path.split('/');
         const dirName = parts.pop();
         const parentPath = parts.join('/');
-        const parent = this.resolvePath(parentPath || '.');
+        const parent = this.resolve(parentPath || '.');
 
         if (!parent) {
             return `mkdir: cannot create directory '${path}': No such file or directory`;
@@ -129,7 +130,7 @@ class FileSystem {
         const parts = path.split('/');
         const fileName = parts.pop();
         const parentPath = parts.join('/');
-        const parent = this.resolvePath(parentPath || '.');
+        const parent = this.resolve(parentPath || '.');
 
         if (!parent) {
             return `touch: cannot create file '${path}': No such directory`;
@@ -156,7 +157,7 @@ class FileSystem {
             return 'cat: missing filename';
         }
 
-        const target = this.resolvePath(path);
+        const target = this.resolve(path);
         if (!target) {
             return `cat: ${path}: No such file or directory`;
         }
