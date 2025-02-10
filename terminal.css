@@ -1,0 +1,93 @@
+:root {
+    --terminal-color: #00ff00;
+    --terminal-bg: #222222;
+    --terminal-font: "Fira Mono", monospace;
+    --crt-glow: 0px 0px 10px #00ff00bb;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000000;
+    color: var(--terminal-color);
+    font-family: var(--terminal-font);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#scanlines {
+    position: absolute;
+    border-radius: 10px;
+    width: calc(100vw - 20px);
+    height: calc(100% - 20px);
+    max-width: 780px;
+    max-height: 770px;
+}
+
+#terminal {
+    padding: 10px 15px 10px 15px;
+    border: 10px solid #111111;
+    border-radius: 20px;
+    width: 100vw;
+    height: calc(100% - 40px);
+    max-width: 750px;
+    max-height: 750px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--terminal-bg);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
+    transition: scrollbar-color 0.3s ease;
+}
+
+#terminal.show-scrollbar {
+    scrollbar-color: var(--terminal-color) rgba(0, 0, 0, 0) !important;
+}
+
+#input {
+    background: transparent;
+    border: none;
+    color: var(--terminal-color);
+    font-family: var(--terminal-font);
+    font-size: inherit;
+    flex-grow: 1;
+    outline: none;
+    text-shadow: var(--crt-glow);
+    position: relative;
+    top: -1px;
+    left: -1.5px;
+    z-index: 1;
+}
+
+.prompt {
+    margin-right: 10px;
+    text-shadow: var(--crt-glow);
+    white-space: pre;
+    margin: 0;
+}
+
+
+.output, .input {
+    position: relative;
+    margin: 5px 0;
+    font-size: clamp(0rem, 1.85vw, 0.95rem);
+    z-index: 1;
+}
+
+.output {
+    line-height: 1.4;
+    text-shadow: var(--crt-glow);
+    white-space: pre;
+}
+
+.input {
+    display: flex;
+}
+
+a, a:hover, a:active, a:visited {
+    color: var(--terminal-color);
+    text-decoration: underline;
+    text-shadow: var(--crt-glow);
+}
